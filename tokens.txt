@@ -1,6 +1,6 @@
 whitespace=[\n\t ]
 semicolon=;
-id=[[:alpha:]][[:alpha:]]
+id=[[:alpha:]][[:alpha:][:digit:]]*
 integer=[0-9]+
 underscore='_'
 rparam='('

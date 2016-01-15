@@ -114,7 +114,7 @@ int main(int argc, char** argv) { // TODO a function that frees all of the progr
     
     //print_token_names();
     compile_regex();
-    int check = regexec(&first->next->next->token_regex, "Ab", 0, NULL, 0);
+    int check = regexec(&first->next->next->token_regex, "A75", 0, NULL, 0);
     printf("%s", check ? "nope" : "yay!");
     
     return (EXIT_SUCCESS);
