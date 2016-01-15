@@ -1,7 +1,7 @@
 /* 
  * File:   main.c
  * Author: Avishay
- *
+ * it's the base idea, tho it doesn't work perfectly yet
  * Created on January 14, 2016, 10:08 PM
  */
 
