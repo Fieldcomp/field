@@ -31,43 +31,55 @@ token *first;
 void read_tokens(FILE *file) {
     first = malloc(sizeof(token));
     token *current = first;
-    token *prev;
+    token *prev; // needed to free useless token in the end
     char c = '0';
     int i;
-    while (1) {               
-        i = 0;
-        char tkn_name[15];
+    while (!feof(file)) {
+        c = fgetc(file);
         
-        while ((c = fgetc(file)) != ' ' && c != EOF) {
-            tkn_name[i++] = c;
-        }
-        tkn_name[i] = '\0';
-        current->token_name = (char *) malloc(sizeof(tkn_name));
-        strcpy(current->token_name, tkn_name);
-        
-        // printf("%s", current->token_name);
-        
-        if (feof(file))
+        if(c == EOF)
             break;
         
-        fgetc(file);
-        fgetc(file);
+        char name[15], val[30];
         
         i = 0;
-        char tkn_expr[50];
-        while (((c = fgetc(file)) != '\n')) {
-            tkn_expr[i++] = c;
+        while (c != '=') {
+            name[i++] = c;
+            c = fgetc(file);
         }
-        tkn_expr[i] = '\0';
-        current->token_literal = (char *) malloc(sizeof(tkn_expr));
-        strcpy(current->token_literal, tkn_expr);           
+        name[i] = '\0';
+        
+        c = fgetc(file); //get rid of the equal sign
+        
+        i = 0;
+        while (c != '\n') {
+            if (c == '\\') //needed to de-escape escape 
+                switch(c = fgetc(file)) {
+                    case 'n':
+                        c = '\n';
+                        break;
+                    case 't':
+                        c = '\t';
+                        break;
+                    default:
+                        val[i++] = "\\";
+                }
+            val[i++] = c;
+            c = fgetc(file);
+        }
+        val[i-1] = '\0';
+        
+        current->token_name = malloc(strlen(name));
+        strcpy(current->token_name, name);
+        
+        current->token_literal = malloc(strlen(val));
+        strcpy(current->token_literal, val);
         
         current->next = malloc(sizeof(token));
         prev = current;
         current = current->next;
     }
-    free(current);
-    prev->next = NULL; //egh for some reason I can't fix it without having the previous struct pointed
+    prev->next = NULL;
 }
 
 void print_token_names() {
@@ -87,42 +99,24 @@ void compile_regex() {
         if (chk) {
             printf("%s didn't compile\n", nextT->token_name);
             
-        } else
-            //printf("%s did compile\n", nextT->token_name);
+        } //else
+          //printf("%s did compile\n", nextT->token_literal);
+        
         
         nextT = nextT->next;
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) { // TODO a function that frees all of the program's memory when it's done.. ERGH ERGH LINKED LIST
     FILE *token_file = fopen("tokens.txt", "r");
     read_tokens(token_file);
     fclose(token_file);
     
-    print_token_names();
-    
+    //print_token_names();
     compile_regex();
-    
-    int check = regexec(&first->token_regex, "a", 0, NULL, 0);
-    
-    printf("trying %s-%s\n", first->token_name, first->token_literal);
+    int check = regexec(&first->next->next->token_regex, "Ab", 0, NULL, 0);
     printf("%s", check ? "nope" : "yay!");
     
-/* working compilation and execution code
-    match = regcomp(&regex, "[a-c]", 0);
-    if (match) {
-        printf("not okay\n");
-    } else
-        printf("okay\n");
-    
-    match = regexec(&regex, "c", 0, NULL, 0);;
-    
-    if (!match) {
-        puts("found!");
-    } else if (match == REG_NOMATCH) {
-        puts("no match found");
-    }
-*/
     return (EXIT_SUCCESS);
 }
 
